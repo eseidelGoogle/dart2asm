@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:path/path.dart' as p;
 
+// Would prefer a pure-dart solution which does not
+// rely on the existance of a Flutter SDK.
 class Paths {
   final String flutterSdk;
   String get flutterCache => p.join(flutterSdk, 'bin/cache');
@@ -46,7 +48,6 @@ void main(List<String> args) async {
   await run([
     paths.dart,
     paths.frontendServer,
-    // This SDK shouldn't be needed?
     "--sdk-root",
     paths.patchedSdk,
     "--target=flutter",
@@ -58,27 +59,9 @@ void main(List<String> args) async {
   await run([
     paths.genSnapshot,
     "--causal_async_stacks",
-    "--packages=.packages",
     "--deterministic",
     "--snapshot_kind=app-aot-assembly",
     "--assembly=" + results['output'],
-    "--no-sim-use-hardfp",
-    "--no-use-integer-division",
     dillPath,
   ]);
-
-  // run([
-  //   genSnapshotPath,
-  //   "--causal_async_stacks",
-  //   "--packages=.packages",
-  //   "--deterministic",
-  //   "--snapshot_kind=app-aot-blobs",
-  //   "--vm_snapshot_data=vm_snapshot_data",
-  //   "--isolate_snapshot_data=isolate_snapshot_data",
-  //   "--vm_snapshot_instructions=vm_snapshot_instr",
-  //   "--isolate_snapshot_instructions=isolate_snapshot_instr",
-  //   "--no-sim-use-hardfp",
-  //   "--no-use-integer-division",
-  //   "app.dill",
-  // ]);
 }
