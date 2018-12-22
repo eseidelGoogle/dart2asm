@@ -31,7 +31,12 @@ void main(List<String> args) async {
   Paths paths = new Paths('/src/flutter');
   var parser = new ArgParser();
   parser.addOption('output', abbr: 'o', defaultsTo: 'out.S');
+  parser.addFlag('version');
   var results = parser.parse(args);
+  if (results['version']) {
+    print(Platform.version);
+    return;
+  }
 
   String source = results.rest.first;
 
