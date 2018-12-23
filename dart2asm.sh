@@ -1,8 +1,6 @@
 #!/bin/bash
-
-set -e
-
-unset CDPATH
+set -e # Exit immediately if pipelines fail.
+unset CDPATH # Force cd to only look at CWD.
 
 function follow_links() {
   cd -P "${1%/*}"
