@@ -45,12 +45,13 @@ AssemblyParserResult parseAssemblyFromStderr(String inputText) {
 
   bool inBlock = false;
   bool inAssembly = false;
-  RegExp blockStart = new RegExp(r"^(.+)\{$");
+  final RegExp blockStart = new RegExp(r"^(.+)\{$");
   // Code for optimized function 'file:///src/dart2asm/default.dart_::_square' {
-  RegExp assemblyStart = new RegExp(
+  final RegExp assemblyStart = new RegExp(
       r"^Code for (?:optimized )?function '(.+)' \{$",
       multiLine: true);
-  RegExp blockEnd = new RegExp(r"^\}$");
+  final RegExp blockEnd = new RegExp(r"^\}$");
+  final RegExp whitespace = new RegExp(r"\s+");
 
   for (String line in LineSplitter.split(inputText)) {
     if (inBlock) {
@@ -58,6 +59,15 @@ AssemblyParserResult parseAssemblyFromStderr(String inputText) {
         inBlock = false;
         inAssembly = false;
       } else if (inAssembly) {
+        List<String> columns = line.split(whitespace);
+        // Remove the first two columns if they're addresses, e.g.
+        // 0x3279c94    e3500000               cmp r0, #0
+        // And add extra indent to the ;; comment lines.
+        // HACK: Unclear why this is columns[1] and columns.first is whitespace?
+        if (columns[1] == ";;")
+          line = "    " + line;
+        else if (int.tryParse(columns.first) != null)
+          line = "        " + columns.sublist(2).join(' ');
         assemblyLines.add(line);
       }
     } else {
@@ -69,6 +79,8 @@ AssemblyParserResult parseAssemblyFromStderr(String inputText) {
           // Add fake label:
           String functionPath = match.group(1);
           String functionName = functionPath.split('::').last;
+          // Remove the leading _ to avoid auto-hiding them.
+          // functionName = functionName.substring(1);
           assemblyLines.add(functionName + ':');
         }
       } else {
